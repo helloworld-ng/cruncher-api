@@ -203,7 +203,7 @@ ul li, ol li {
         <tr>
           <td>
             <h4>Hi There,</h4>
-            <p>Cruncher has succeded in parsing your uploaded transaction statement</p>
+            <p>Cruncher has finished parsing your uploaded transaction statement</p>
 
             <h3 class="border-top">
               To view the results of the parse, go here - <a href="<%= @url %>"><%= @url %></a>. To delete this sheet from db, here's a link - <a href="<%= @deleteUrl %>"><%= @deleteUrl %></a>
@@ -233,7 +233,7 @@ ul li, ol li {
         <table>
           <tr>
             <td align="center">
-              <p>This message was sent to opemipoaikomo@gmail.com. If you don't want to receieve these emails anymore <a href="#"><unsubscribe>Manage your notification settings</unsubscribe></a>.
+              <p>This message was sent to <%= @email %></a>.
               </p>
             </td>
           </tr>

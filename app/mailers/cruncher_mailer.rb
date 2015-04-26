@@ -4,6 +4,7 @@ class CruncherMailer < ApplicationMailer
 		@sheet = sheet
 		@url = base_url + sheet.token + '/transactions'
       	@deleteUrl = base_url + sheet.token + '/delete'
+      	@email = email
       	
 		mail(to: email, subject: 'Your statement has been crunched.')
 	end
