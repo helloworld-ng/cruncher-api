@@ -8,7 +8,7 @@ class SheetsController < ApplicationController
   	@file = Roo::Excelx.new(tmp_file.path)
     tmp_file.close
 
-  	save_file(@file, params[:email])
+  	save_file(@file, params[:email].to_s)
   end
 
   def details 
@@ -221,7 +221,8 @@ class SheetsController < ApplicationController
 	  		end
 	  	end
 
-      puts "Send email to #{email}"
+      CruncherMailer.crunched_statement(sheet, email).deliver_now
+
       render json: sheet.to_json
   	end
 end
