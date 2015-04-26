@@ -1,6 +1,6 @@
 class Sheet < ActiveRecord::Base
 	before_create :randomize_id
-	has_many :rows
+	has_many :rows, :dependent => :destroy
 	self.primary_key = 'token'
 
 	private

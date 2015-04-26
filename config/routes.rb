@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   get  'sheet/:id/search', to: 'sheets#search'
   get  'sheet/:id/expenses', to: 'sheets#expenses'
   get  'sheet/:id/income', to: 'sheets#income'
+  delete 'sheet/:id', to: 'sheets#destroy'
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

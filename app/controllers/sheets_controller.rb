@@ -5,13 +5,10 @@ class SheetsController < ApplicationController
     tmp_file.binmode
     tmp_file.write(file.read)
 
-    # path = Rails.root.join('public', 'uploads', file.original_filename)
-    # File.open(path, 'wb') do |f|
-    #   f.write(file.read)
-    # end
-
   	@file = Roo::Excelx.new(tmp_file.path)
-  	save_file(@file)
+    tmp_file.close
+
+  	save_file(@file, params[:email])
   end
 
   def details 
@@ -170,6 +167,15 @@ class SheetsController < ApplicationController
     render json: @transactions.to_json
   end
 
+  def destroy
+    @sheet = Sheet.find(params[:id])
+    if @sheet.destroy
+      render json: {success: "Deleted Sheet"}, status: 200
+    else
+      render json: {errors: @sheet.errors}, status: 422
+    end
+  end
+
   private
     def validate_file(file)
       @rows = ["Trans Date", "Reference", "Value Date", "Debit", "Credit", "Balance", "Remarks"]
@@ -178,7 +184,7 @@ class SheetsController < ApplicationController
       end
     end
 
-  	def save_file(file)
+  	def save_file(file, email)
       validate_file(file)
 
       @account = file.row(10)[0].scan(/\d+/)[0]
@@ -211,11 +217,11 @@ class SheetsController < ApplicationController
             row.tag = 0
           end
 
-          puts row
 	  			row.save
 	  		end
 	  	end
 
+      puts "Send email to #{email}"
       render json: sheet.to_json
   	end
 end
