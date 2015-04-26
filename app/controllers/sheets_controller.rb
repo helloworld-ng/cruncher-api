@@ -1,6 +1,16 @@
 class SheetsController < ApplicationController
   def crunch
-  	@file = Roo::Excelx.new('/Users/opemipo/Downloads/gtb.xlsx')
+    file = params[:file]
+    tmp_file = Tempfile.new([file.original_filename, '.xlsx'])
+    tmp_file.binmode
+    tmp_file.write(file.read)
+
+    # path = Rails.root.join('public', 'uploads', file.original_filename)
+    # File.open(path, 'wb') do |f|
+    #   f.write(file.read)
+    # end
+
+  	@file = Roo::Excelx.new(tmp_file.path)
   	save_file(@file)
   end
 
@@ -161,7 +171,16 @@ class SheetsController < ApplicationController
   end
 
   private
+    def validate_file(file)
+      @rows = ["Trans Date", "Reference", "Value Date", "Debit", "Credit", "Balance", "Remarks"]
+      unless file.row(18) == @rows && file.last_column == 7 && file.last_row > 26     
+        render json: { message: "This is not a valid GTB transaction sheet #{file.row(18)}" }, status: 422 and return
+      end
+    end
+
   	def save_file(file)
+      validate_file(file)
+
       @account = file.row(10)[0].scan(/\d+/)[0]
       @dates = file.row(14)[0].scan(/.....\d*..\d{4}/)
   		sheet = Sheet.new(name: @file.row(5)[0], address: @file.row(8)[0], account: @account, from: @dates[0], to: @dates[1])
