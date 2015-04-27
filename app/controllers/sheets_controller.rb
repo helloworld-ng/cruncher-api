@@ -1,12 +1,7 @@
 class SheetsController < ApplicationController
   def crunch
     upload = params[:file]
-    path = Rails.root.join('public', 'tmp', upload.original_filename)
-    File.open(path, 'wb') do |file|
-      file.write(upload.read)
-    end
-  	@file = Roo::Excelx.new(path.to_s)
-    File.delete(path) 
+  	@file = Roo::Excelx.new(upload.path)
 
   	save_file(@file, params[:email].to_s)
   end
