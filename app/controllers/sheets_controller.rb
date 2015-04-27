@@ -195,7 +195,7 @@ class SheetsController < ApplicationController
   			last_data_row = file.last_row - 9;
 	  		file.each_with_index do |row, index|
 	  			next if index < 18 || index > last_data_row
-	  			row = Row.new(date: row[0], ref: row[1], debit: row[3], credit: row[4], balance: row[5], remarks: row[6], sheet_id: sheet.id)
+	  			row = Row.new(date: row[0], ref: row[1], debit: row[3], credit: row[4], balance: row[5], remarks: row[6], sheet_id: sheet.token)
 
           #Tagging - Others(0), Airtime(1), Transfers(2), Withdrawals(3), Commission(4), Refunds(5), Deposits(6),
           remarks = row.remarks.downcase
