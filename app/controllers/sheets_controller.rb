@@ -3,7 +3,7 @@ class SheetsController < ApplicationController
     upload = params[:file]
     # @file = Roo::Excelx.new(upload.path) 
     # Disabled support for normal excel sheets
-    
+
     @file = Nokogiri::HTML(open(upload.path))
   	save_file(@file, params[:email].to_s, false)
   end
@@ -80,22 +80,27 @@ class SheetsController < ApplicationController
 
     @response['types'] = [{
       name: 'Airtime',
+      tag: 1,
       transaction_count: @airtime.count,
       transaction_amount: @airtime.sum("debit")
     },{
       name: 'Transfers',
+      tag: 2,
       transaction_count: @transfers.count,
       transaction_amount: @transfers.sum("debit")
     },{
       name: 'Withdrawals',
+      tag: 3,
       transaction_count: @withdrawals.count,
       transaction_amount: @withdrawals.sum("debit")
     },{
       name: 'Commissions',
+      tag: 4,
       transaction_count: @commissions.count,
       transaction_amount: @commissions.sum("debit")
     },{
       name: 'Others',
+      tag: 0,
       transaction_count: @others.count,
       transaction_amount: @others.sum("debit")
     }]
@@ -138,18 +143,22 @@ class SheetsController < ApplicationController
 
     @response['types'] = [{
       name: 'Transfers',
+      tag: 2,
       transaction_count: @transfers.count,
       transaction_amount: @transfers.sum("credit")
     },{
       name: 'Deposits',
+      tag: 6,
       transaction_count: @deposits.count,
       transaction_amount: @deposits.sum("credit")
     },{
       name: 'Refunds',
+      tag: 5,
       transaction_count: @refunds.count,
       transaction_amount: @refunds.sum("credit")
     },{
       name: 'Others',
+      tag: 0,
       transaction_count: @others.count,
       transaction_amount: @others.sum("credit")
     }]
