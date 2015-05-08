@@ -23,8 +23,8 @@ ActiveRecord::Schema.define(version: 20150424012542) do
     t.integer  "credit"
     t.integer  "balance"
     t.string   "remarks"
-    t.integer  "sheet_id",   limit: 8
     t.integer  "tag"
+    t.string   "sheet_id"
     t.datetime "created_at",           null: false
     t.datetime "updated_at",           null: false
   end

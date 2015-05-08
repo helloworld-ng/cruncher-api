@@ -1,9 +1,11 @@
 class SheetsController < ApplicationController
   def crunch
     upload = params[:file]
-  	@file = Roo::Excelx.new(upload.path)
+    # @file = Roo::Excelx.new(upload.path) 
+    # Disabled support for normal excel sheets
 
-  	save_file(@file, params[:email].to_s)
+    @file = Nokogiri::HTML(open(upload.path))
+  	save_file(@file, params[:email].to_s, false)
   end
 
   def details 
@@ -45,7 +47,7 @@ class SheetsController < ApplicationController
 
   def expenses
     @response = {}
-    @transactions = Sheet.find(params[:id]).rows.where({credit: nil})
+    @transactions = Sheet.find(params[:id]).rows.where({credit: 0})
     @months = @transactions.group_by { |x| x.date.beginning_of_month }
     @weeks = @transactions.group_by { |x| x.date.beginning_of_week }
     @expense_total = @transactions.inject(0) {|sum,e| sum += e.debit }
@@ -78,22 +80,27 @@ class SheetsController < ApplicationController
 
     @response['types'] = [{
       name: 'Airtime',
+      tag: 1,
       transaction_count: @airtime.count,
       transaction_amount: @airtime.sum("debit")
     },{
       name: 'Transfers',
+      tag: 2,
       transaction_count: @transfers.count,
       transaction_amount: @transfers.sum("debit")
     },{
       name: 'Withdrawals',
+      tag: 3,
       transaction_count: @withdrawals.count,
       transaction_amount: @withdrawals.sum("debit")
     },{
       name: 'Commissions',
+      tag: 4,
       transaction_count: @commissions.count,
       transaction_amount: @commissions.sum("debit")
     },{
       name: 'Others',
+      tag: 0,
       transaction_count: @others.count,
       transaction_amount: @others.sum("debit")
     }]
@@ -104,7 +111,7 @@ class SheetsController < ApplicationController
 
   def income
     @response = {}
-    @transactions = Sheet.find(params[:id]).rows.where({debit: nil})
+    @transactions = Sheet.find(params[:id]).rows.where({debit: 0})
     @months = @transactions.group_by { |x| x.date.beginning_of_month }
     @weeks = @transactions.group_by { |x| x.date.beginning_of_week }
     @income_total = @transactions.inject(0) {|sum,e| sum += e.credit }
@@ -136,18 +143,22 @@ class SheetsController < ApplicationController
 
     @response['types'] = [{
       name: 'Transfers',
+      tag: 2,
       transaction_count: @transfers.count,
       transaction_amount: @transfers.sum("credit")
     },{
       name: 'Deposits',
+      tag: 6,
       transaction_count: @deposits.count,
       transaction_amount: @deposits.sum("credit")
     },{
       name: 'Refunds',
+      tag: 5,
       transaction_count: @refunds.count,
       transaction_amount: @refunds.sum("credit")
     },{
       name: 'Others',
+      tag: 0,
       transaction_count: @others.count,
       transaction_amount: @others.sum("credit")
     }]
@@ -179,41 +190,77 @@ class SheetsController < ApplicationController
       end
     end
 
-  	def save_file(file, email)
-      validate_file(file)
+  	def save_file(file, email, xls)
 
-      @account = file.row(10)[0].scan(/\d+/)[0]
-      @dates = file.row(14)[0].scan(/.....\d*..\d{4}/)
-  		sheet = Sheet.new(name: @file.row(5)[0], address: @file.row(8)[0], account: @account, from: @dates[0], to: @dates[1])
+      if (xls) 
+        validate_file(file)
+        last_data_row = file.last_row - 9;
+        transactions = []
+        file.each_with_index do |row, i|
+          next if index < 18 || index > last_data_row
+          transactions << row
+        end
+        @account = file.row(10)[0].scan(/\d+/)[0]
+        @dates = file.row(14)[0].scan(/.....\d*..\d{4}/)
+        @name = file.row(5)[0]
+        @address = file.row(8)[0]
+      else 
+        rows = @file.xpath('//table[@id="dgtrans"]/tr')
+        transactions = rows.collect do |row|
+          transaction = {}
+          [
+            [:date, 'td[1]/text()'], #date
+            [:ref, 'td[2]/text()'], #ref
+            [:debit, 'td[4]/text()'], #debit
+            [:credit, 'td[5]/text()'], #credit
+            [:balance, 'td[6]/text()'], #balance
+            [:remarks, 'td[7]/text()'], #remarks
+          ].each do |name, xpath|
+            integers = [:debit, :credit, :balance]
+            val = row.at_xpath(xpath).text()
+            if integers.include?(name)
+              val = val.to_s.scan(/\b-?[\d.]+/).join.to_f
+            end
+            transaction[name] = val
+          end
+          transaction
+        end
+        transactions.shift
+        @account = @file.css("#lblAcctNo").text().scan(/\d+/)[0]
+        dateString = @file.css("#lblPeriod1").text() + @file.css("#lblPeriod2").text()
+        @dates = dateString.scan(/.....\d*..\d{4}/)
+        @name = @file.css("#lblAcctName").text()
+        @address = @file.css("#lblAddress").text()
+      end
+
+  		sheet = Sheet.new(name: @name, address: @address, account: @account, from: @dates[0], to: @dates[1])
 
   		if sheet.save
-  			last_data_row = file.last_row - 9;
-	  		file.each_with_index do |row, index|
-	  			next if index < 18 || index > last_data_row
-	  			row = Row.new(date: row[0], ref: row[1], debit: row[3], credit: row[4], balance: row[5], remarks: row[6], sheet_id: sheet.token)
-
+	  		transactions.each do |row|
+          row[:sheet_id] = sheet.token;
           #Tagging - Others(0), Airtime(1), Transfers(2), Withdrawals(3), Commission(4), Refunds(5), Deposits(6),
-          remarks = row.remarks.downcase
+          remarks = row[:remarks].downcase
           if remarks.include?('airtime')
-            row.tag = 1
+            row[:tag] = 1
           elsif remarks.include?('transfer')
-            row.tag = 2
+            row[:tag] = 2
           elsif remarks.include?('instant payment')
-            row.tag = 2
+            row[:tag] = 2
           elsif remarks.include?('commission')
-            row.tag = 4
+            row[:tag] = 4
           elsif remarks.include?('withdrawal')
-            row.tag = 3
+            row[:tag] = 3
           elsif remarks.include?('refund')
-            row.tag = 5
+            row[:tag] = 5
           elsif remarks.include?('deposit')
-            row.tag = 6
+            row[:tag] = 6
           else
-            row.tag = 0
+            row[:tag] = 0
           end
-
-	  			row.save
 	  		end
+        # Row.create(transactions)
+        transactions = transactions.collect {|row| Row.new(row) }
+        Row.import transactions
 	  	end
 
       CruncherMailer.crunched_statement(sheet, email).deliver_now

@@ -7,8 +7,8 @@ class CreateRows < ActiveRecord::Migration
       t.integer :credit
       t.integer :balance
       t.string :remarks
-      t.integer :sheet_id, :limit => 8
       t.integer :tag
+      t.string :sheet_id
 
       t.timestamps null: false
     end
