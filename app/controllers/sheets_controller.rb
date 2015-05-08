@@ -258,7 +258,9 @@ class SheetsController < ApplicationController
             row[:tag] = 0
           end
 	  		end
-        Row.create(transactions)
+        # Row.create(transactions)
+        transactions = transactions.collect {|row| Row.new(row) }
+        Row.import transactions
 	  	end
 
       CruncherMailer.crunched_statement(sheet, email).deliver_now

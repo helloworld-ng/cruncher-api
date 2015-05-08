@@ -15,6 +15,8 @@ gem 'rack-cors', '0.3.0'
 
 gem 'pg'
 
+gem "activerecord-import", ">= 0.2.0"
+
 # To use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
