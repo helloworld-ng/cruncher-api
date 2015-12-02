@@ -5,18 +5,27 @@ gem 'rails', '4.2.0'
 
 gem 'rails-api'
 
-gem 'spring', :group => :development
-
-# gem 'sqlite3'
+# gem 'spring', :group => :development
 
 gem 'roo', '~> 1.13.2'
 
 gem 'rack-cors', '0.3.0'
 
-gem 'pg'
+gem 'grape'
+
+gem 'ng-bank-parser'
 
 gem "activerecord-import", ">= 0.2.0"
 
+
+group :development do
+  gem 'rb-readline'
+  gem 'sqlite3'
+end
+
+group :production do
+  gem 'pg'
+end
 # To use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 

@@ -11,10 +11,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150424012542) do
+ActiveRecord::Schema.define(version: 20151202100546) do
 
-  # These are extensions that must be enabled in order to support this database
-  enable_extension "plpgsql"
+  create_table "entries", force: :cascade do |t|
+    t.datetime "date"
+    t.string   "ref"
+    t.boolean  "transaction_type"
+    t.float    "amount"
+    t.float    "balance"
+    t.string   "remarks"
+    t.integer  "tag"
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
+    t.string   "sheet_id"
+  end
+
+  add_index "entries", ["sheet_id"], name: "index_entries_on_sheet_id"
 
   create_table "rows", force: :cascade do |t|
     t.datetime "date"
@@ -38,8 +50,10 @@ ActiveRecord::Schema.define(version: 20150424012542) do
     t.datetime "to"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string   "bank"
+    t.string   "email"
   end
 
-  add_index "sheets", ["token"], name: "index_sheets_on_token", unique: true, using: :btree
+  add_index "sheets", ["token"], name: "index_sheets_on_token", unique: true
 
 end

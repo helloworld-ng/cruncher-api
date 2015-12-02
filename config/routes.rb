@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  mount Cruncher::API => '/'
   post 'sheets/crunch'
   get  'sheet/:id/transactions', to: 'sheets#transactions'
   get  'sheet/:id/details', to: 'sheets#details'

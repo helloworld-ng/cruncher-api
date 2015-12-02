@@ -1,14 +1,14 @@
 class SheetsController < ApplicationController
   def crunch
     upload = params[:file]
-    # @file = Roo::Excelx.new(upload.path) 
+    # @file = Roo::Excelx.new(upload.path)
     # Disabled support for normal excel sheets
 
     @file = Nokogiri::HTML(open(upload.path))
   	save_file(@file, params[:email].to_s, false)
   end
 
-  def details 
+  def details
     @sheet = Sheet.find(params[:id])
     if @sheet
       render json: @sheet.to_json
@@ -21,20 +21,20 @@ class SheetsController < ApplicationController
     @transactions = [];
     unless params[:weekly]
       @rows = Sheet.find(params[:id]).rows.group_by { |x| x.date.beginning_of_month }
-    else 
+    else
       @rows = Sheet.find(params[:id]).rows.group_by { |x| x.date.beginning_of_week }
     end
     @rows.each do |period, values|
       @expenses = values.select { |trans| trans.debit?  }
-      @expense_total = @expenses.inject(0) {|sum,e| sum += e.debit } 
+      @expense_total = @expenses.inject(0) {|sum,e| sum += e.debit }
       @income = values.select { |trans| trans.credit?  }
-      @income_total = @income.inject(0) {|sum,e| sum += e.credit } 
+      @income_total = @income.inject(0) {|sum,e| sum += e.credit }
 
       @period = {
         date: period,
-        time: params[:weekly] ? period.strftime("Week %-U, %d %b %y") : period.strftime("%B, %Y"),          
+        time: params[:weekly] ? period.strftime("Week %-U, %d %b %y") : period.strftime("%B, %Y"),
         opening_balance: values[0].balance,
-        expense_total: @expense_total, 
+        expense_total: @expense_total,
         income_total: @income_total,
         expenses: @expenses,
         income: @income,
@@ -185,14 +185,14 @@ class SheetsController < ApplicationController
   private
     def validate_file(file)
       @rows = ["Trans Date", "Reference", "Value Date", "Debit", "Credit", "Balance", "Remarks"]
-      unless file.row(18) == @rows && file.last_column == 7 && file.last_row > 26     
+      unless file.row(18) == @rows && file.last_column == 7 && file.last_row > 26
         render json: { message: "This is not a valid GTB transaction sheet #{file.row(18)}" }, status: 422 and return
       end
     end
 
   	def save_file(file, email, xls)
 
-      if (xls) 
+      if (xls)
         validate_file(file)
         last_data_row = file.last_row - 9;
         transactions = []
@@ -204,7 +204,7 @@ class SheetsController < ApplicationController
         @dates = file.row(14)[0].scan(/.....\d*..\d{4}/)
         @name = file.row(5)[0]
         @address = file.row(8)[0]
-      else 
+      else
         rows = @file.xpath('//table[@id="dgtrans"]/tr')
         transactions = rows.collect do |row|
           transaction = {}
@@ -212,7 +212,7 @@ class SheetsController < ApplicationController
             [:date, 'td[1]/text()'], #date
             [:ref, 'td[2]/text()'], #ref
             [:debit, 'td[4]/text()'], #debit
-            [:credit, 'td[5]/text()'], #credit
+            [:credit, 'td[5]/text()'], #credit?
             [:balance, 'td[6]/text()'], #balance
             [:remarks, 'td[7]/text()'], #remarks
           ].each do |name, xpath|

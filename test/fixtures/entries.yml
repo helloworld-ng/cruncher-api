@@ -1,0 +1,19 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  date: 2015-12-02 10:37:26
+  ref: MyString
+  transaction_type: false
+  amount: 1.5
+  balance: 1.5
+  remarks: MyString
+  tag: 1
+
+two:
+  date: 2015-12-02 10:37:26
+  ref: MyString
+  transaction_type: false
+  amount: 1.5
+  balance: 1.5
+  remarks: MyString
+  tag: 1
