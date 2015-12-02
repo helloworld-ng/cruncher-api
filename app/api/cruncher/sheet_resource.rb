@@ -65,7 +65,7 @@ module Cruncher
       requires :token
     end
     # POST /meta
-    post :meta do
+    get :meta do
       @sheet = Sheet.find_by_token(params[:token])
       if @sheet then set_sheet(@sheet) else
         error!({errors: "Couldn't find the sheet you requested for" }, 422) end
@@ -87,6 +87,7 @@ module Cruncher
         if sheet.save
           transactions = result[:data][:transactions]
           transactions.each do |transaction|
+            puts transaction.class
             transaction[:sheet_id] = sheet.token
             add_tag_to_transaction(transaction)
           end
