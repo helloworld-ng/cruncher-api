@@ -9,9 +9,10 @@ module Cruncher
     helpers do
       # json representation of sheet object
       def set_sheet sheet
+        fullname = sheet.name.split
         {
           token: sheet.token,
-          name: sheet.name,
+          name: fullname.first.capitalize + " " + fullname.last.capitalize,
           address: sheet.address,
           bank: sheet.bank,
           account: sheet.account,
