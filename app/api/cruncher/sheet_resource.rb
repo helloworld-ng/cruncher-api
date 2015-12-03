@@ -14,7 +14,7 @@ module Cruncher
           name: sheet.name,
           address: sheet.address,
           bank: sheet.bank,
-          account: sheet.address,
+          account: sheet.account,
           from: sheet.from,
           to: sheet.to,
           created_at: sheet.created_at,
