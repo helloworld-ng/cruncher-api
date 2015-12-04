@@ -41,8 +41,8 @@ module Cruncher
         income_amount_and_credits = sheet.get_income_amount_and_credits
         expense_amount_and_debits = sheet.get_expense_amount_and_debits
         {
-          incomeAmount: income_amount_and_credits[1],
-          expenseAmount: expense_amount_and_debits[1],
+          incomeAmount: income_amount_and_credits[1].round(2),
+          expenseAmount: expense_amount_and_debits[1].round(2),
           credits: income_amount_and_credits[0],
           debits: expense_amount_and_debits[0],
           categories: sheet.get_categories_data,

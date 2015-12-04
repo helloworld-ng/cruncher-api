@@ -17,8 +17,8 @@ class Sheet < ActiveRecord::Base
 		summary = []
 		monthly_transactions.each do |date, transactions|
 			month_summary = {}
-			income = transactions.select {|transaction| transaction.credit? }.sum(&:amount)
-			expense = transactions.select {|transaction| transaction.debit? }.sum(&:amount)
+			income = transactions.select {|transaction| transaction.credit? }.sum(&:amount).round(2)
+			expense = transactions.select {|transaction| transaction.debit? }.sum(&:amount).round(2)
 			month_summary[:month] = Date::MONTHNAMES[date.month]
 			month_summary[:year] = date.year.to_s
 			month_summary[:income] = income
@@ -48,8 +48,8 @@ class Sheet < ActiveRecord::Base
 			transactions_in_category = entries.where({tag: index})
 			category = {}
 			category[:name] = Entry::CATEGORIES[index]
-			category[:percent] = transactions_in_category.count.percent_of(no_of_transactions)
-			category[:amount] = transactions_in_category.sum(:amount)
+			category[:percent] = transactions_in_category.count.percent_of(no_of_transactions).round(2)
+			category[:amount] = transactions_in_category.sum(:amount).round(2)
 
 			categories << category
 		end
