@@ -45,7 +45,8 @@ class Sheet < ActiveRecord::Base
 		categories = []
 		no_of_transactions = entries.count
 		(0..6).each do |index|
-			transactions_in_category = entries.where({tag: index})
+			transaction_type = index > 4 ? true : false; # Last two categories are credit categories
+			transactions_in_category = entries.where({tag: index, transaction_type: transaction_type})
 			category = {}
 			category[:name] = Entry::CATEGORIES[index]
 			category[:percent] = transactions_in_category.count.percent_of(no_of_transactions).round(2)
