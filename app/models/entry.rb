@@ -4,11 +4,11 @@ class Entry < ActiveRecord::Base
   CATEGORIES = ['Others', 'Airtime', 'Transfers', 'Withdrawals', 'Commissions', 'Refunds', 'Deposits']
 
   def credit?
-    self.transaction_type == true
+    self.transaction_type == 1
   end
 
   def debit?
-    self.transaction_type == false
+    self.transaction_type == 0
   end
 
 end
