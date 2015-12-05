@@ -122,9 +122,18 @@ module Cruncher
       route_param :token do
 
         desc 'returns trend data for a bank sheet'
+        # GET /:token/trends
         get :trends do
           @sheet = Sheet.find_by_token(params[:token])
           set_trend_data(@sheet)
+        end
+
+
+        desc 'Get month by month comparison of transactions'
+        # GET /:token/transactions
+        get :compare do
+          @sheet = Sheet.find_by_token(params[:token])
+          @sheet.get_monthly_comparisons
         end
 
       end

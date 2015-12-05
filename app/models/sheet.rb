@@ -58,7 +58,29 @@ class Sheet < ActiveRecord::Base
 		categories
 	end
 
+	def get_monthly_comparisons
+		monthly_transactions = entries.group_by {|x| x.date.beginning_of_month }
+		comparisons = []
+		monthly_transactions.each do |date, transactions|
+			income = transactions.select {|transaction| transaction.credit? }
+			expenses = transactions.select {|transaction| transaction.debit? }
+			income_total = income.sum(&:amount).round(2)
+			expenses_total = expenses.sum(&:amount).round(2)
 
+			period = {}
+			period[:date] = date
+			period[:time] = date.strftime("%B, %Y")
+			period[:opening_balance] = transactions.first.balance
+			period[:expense_total] = expenses_total
+			period[:income_total] = income_total
+			period[:expenses] = expenses
+			period[:income] = income
+			period[:transactions] = transactions.count
+
+			comparisons << period
+		end
+		comparisons
+	end
 
 	private
 	def randomize_id
