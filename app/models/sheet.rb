@@ -45,10 +45,10 @@ class Sheet < ActiveRecord::Base
 		categories = []
 		no_of_transactions = entries.count
 		(0..6).each do |index|
-			transaction_type = index > 4 ? true : false; # Last two categories are credit categories
+			transaction_type = index > 4 ? 1 : 0; # Last two categories are credit categories
 			transactions_in_category = entries.where({tag: index, transaction_type: transaction_type})
 			category = {}
-			category[:type] = transaction_type ? "credit" : "debit";
+			category[:type] = transaction_type == 1 ? "credit" : "debit";
 			category[:name] = Entry::CATEGORIES[index]
 			category[:percent] = transactions_in_category.count.percent_of(no_of_transactions).round(2)
 			category[:amount] = transactions_in_category.sum(:amount).round(2)
@@ -58,7 +58,29 @@ class Sheet < ActiveRecord::Base
 		categories
 	end
 
+	def get_monthly_comparisons
+		monthly_transactions = entries.group_by {|x| x.date.beginning_of_month }
+		comparisons = []
+		monthly_transactions.each do |date, transactions|
+			income = transactions.select {|transaction| transaction.credit? }
+			expenses = transactions.select {|transaction| transaction.debit? }
+			income_total = income.sum(&:amount).round(2)
+			expenses_total = expenses.sum(&:amount).round(2)
 
+			period = {}
+			period[:date] = date
+			period[:time] = date.strftime("%B, %Y")
+			period[:opening_balance] = transactions.first.balance
+			period[:expense_total] = expenses_total
+			period[:income_total] = income_total
+			period[:expenses] = expenses
+			period[:income] = income
+			period[:transactions] = transactions.count
+
+			comparisons << period
+		end
+		comparisons
+	end
 
 	private
 	def randomize_id
