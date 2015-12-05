@@ -130,7 +130,7 @@ module Cruncher
 
 
         desc 'Get month by month comparison of transactions'
-        # GET /:token/transactions
+        # GET /:token/compare
         get :compare do
           @sheet = Sheet.find_by_token(params[:token])
           @sheet.get_monthly_comparisons
