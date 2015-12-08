@@ -7,6 +7,14 @@ module Cruncher
 
     # general helper methods used by endpoints
     helpers do
+
+      # attempt to get sheet and return error if not found
+      def get_sheet token
+        @sheet = Sheet.find_by_token(token)
+        if @sheet then return @sheet else
+          error!({errors: "Couldn't find the sheet you requested for" },422, ) end
+      end
+
       # json representation of sheet object
       def set_sheet sheet
         fullname = sheet.name.split
@@ -83,9 +91,8 @@ module Cruncher
       end
       # GET /meta
       get :meta do
-        @sheet = Sheet.find_by_token(params[:token])
-        if @sheet then set_sheet(@sheet) else
-          error!({errors: "Couldn't find the sheet you requested for" }, 422) end
+        @sheet = get_sheet(params[:token])
+        set_sheet(@sheet)
       end
 
 
@@ -124,7 +131,7 @@ module Cruncher
         desc 'returns trend data for a bank sheet'
         # GET /:token/trends
         get :trends do
-          @sheet = Sheet.find_by_token(params[:token])
+          @sheet = get_sheet(params[:token])
           set_trend_data(@sheet)
         end
 
@@ -132,7 +139,7 @@ module Cruncher
         desc 'Get month by month comparison of transactions'
         # GET /:token/compare
         get :compare do
-          @sheet = Sheet.find_by_token(params[:token])
+          @sheet = get_sheet(params[:token])
           @sheet.get_monthly_comparisons
         end
 
@@ -140,15 +147,11 @@ module Cruncher
         desc "Delete a sheet and all it's associated transactions"
         # DELETE /:token/delete
         delete :delete do
-          @sheet = Sheet.find_by_token(params[:token])
-          if @sheet.nil?
-            error!({ errors: 'Could not find sheet with token' }, 422)
+          @sheet = get_sheet(params[:token])
+          if @sheet.destroy
+            { success: "Deleted Sheet" }
           else
-            if @sheet.destroy
-              { success: "Deleted Sheet" }
-            else
-              error!({ errors: @sheet.errors }, 422)
-            end
+            error!({ errors: @sheet.errors }, 422)
           end
         end
 
@@ -159,9 +162,17 @@ module Cruncher
           requires :query
         end
         get :search do
-          @sheet = Sheet.find_by_token(params[:token])
+          @sheet = get_sheet(params[:token])
           @transactions = @sheet.search(params[:query])
           @transactions.map(&:as_json)
+        end
+
+
+        desc "Get full list of transactions for a sheet"
+        # GET /:token/transactions
+        get :transactions do
+          @sheet = get_sheet(params[:token])
+          @sheet.entries.map(&:as_json)
         end
 
       end
