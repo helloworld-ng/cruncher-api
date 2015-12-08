@@ -9,3 +9,6 @@
 /log/*
 !/log/.keep
 /tmp
+cruncher_database_development
+/log/development.log
+/tmp/pids/server.pid
