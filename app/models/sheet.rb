@@ -82,6 +82,10 @@ class Sheet < ActiveRecord::Base
 		comparisons
 	end
 
+	def search query
+    self.entries.where("LOWER(remarks) LIKE LOWER(?)", "%#{query}%")
+  	end
+
 	private
 	def randomize_id
 	  begin

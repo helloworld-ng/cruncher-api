@@ -11,4 +11,17 @@ class Entry < ActiveRecord::Base
     self.transaction_type == 0
   end
 
+  def as_json
+    {
+      date: self.date,
+      ref: self.ref,
+      transaction_type: if self.credit? then 'credit' else 'debit' end,
+      amount: self.amount,
+      balance: self.balance,
+      remarks: self.remarks,
+      category: self.class::CATEGORIES[self.tag],
+      sheet_id: self.sheet_id
+    }
+  end
+
 end

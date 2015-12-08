@@ -136,6 +136,34 @@ module Cruncher
           @sheet.get_monthly_comparisons
         end
 
+
+        desc "Delete a sheet and all it's associated transactions"
+        # DELETE /:token/delete
+        delete :delete do
+          @sheet = Sheet.find_by_token(params[:token])
+          if @sheet.nil?
+            error!({ errors: 'Could not find sheet with token' }, 422)
+          else
+            if @sheet.destroy
+              { success: "Deleted Sheet" }
+            else
+              error!({ errors: @sheet.errors }, 422)
+            end
+          end
+        end
+
+
+        desc "Search a sheet for transactions matching query"
+        # GET /:token/search
+        params do
+          requires :query
+        end
+        get :search do
+          @sheet = Sheet.find_by_token(params[:token])
+          @transactions = @sheet.search(params[:query])
+          @transactions.map(&:as_json)
+        end
+
       end
 
     end
