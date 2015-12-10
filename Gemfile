@@ -13,10 +13,11 @@ gem 'rack-cors', '0.3.0'
 
 gem 'grape'
 
+gem "paranoia", "~> 2.0"
+
 gem 'ng-bank-parser'#, :path => "/mnt/0AFE4F7FFE4F6255/Users/lolubodunwa/dev/ruby/ng-bank-parser"
 
 gem "activerecord-import", ">= 0.2.0"
-
 
 group :development do
   gem 'rb-readline'

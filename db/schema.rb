@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151204083925) do
+ActiveRecord::Schema.define(version: 20151210034953) do
 
   create_table "entries", force: :cascade do |t|
     t.datetime "date"
@@ -24,8 +24,10 @@ ActiveRecord::Schema.define(version: 20151204083925) do
     t.datetime "created_at",       null: false
     t.datetime "updated_at",       null: false
     t.string   "sheet_id"
+    t.datetime "deleted_at"
   end
 
+  add_index "entries", ["deleted_at"], name: "index_entries_on_deleted_at"
   add_index "entries", ["sheet_id"], name: "index_entries_on_sheet_id"
 
   create_table "rows", force: :cascade do |t|

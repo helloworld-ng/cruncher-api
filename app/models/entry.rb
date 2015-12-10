@@ -1,4 +1,5 @@
 class Entry < ActiveRecord::Base
+  acts_as_paranoid
   belongs_to :sheet
 
   CATEGORIES = ['Others', 'Airtime', 'Transfers', 'Withdrawals', 'Commissions', 'Refunds', 'Deposits']

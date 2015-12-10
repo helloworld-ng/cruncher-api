@@ -15,6 +15,13 @@ module Cruncher
           error!({errors: "Couldn't find the sheet you requested for" },422, ) end
       end
 
+      # attempt to get transaction in sheet and return error if not found
+      def get_transaction sheet, transaction_id
+        @transaction = @sheet.entries.exists?(transaction_id)
+        if @transaction then return @sheet.entries.find(transaction_id) else
+          error!({errors: "Couldn't find the transaction in this sheet" },422, ) end
+      end
+
       # json representation of sheet object
       def set_sheet sheet
         fullname = sheet.name.split
@@ -174,7 +181,44 @@ module Cruncher
           @sheet = get_sheet(params[:token])
           @sheet.entries.map(&:as_json)
         end
+      end
 
+      route_param :token do
+        # nested route for /sheets/:token/transactions
+        resource :transactions do
+
+          desc 'soft delete a transaction'
+          # GET /:token/transactions/:id
+          params do
+            requires :id
+          end
+          delete ':id' do
+            @sheet = get_sheet(params[:token])
+            @transaction = get_transaction(@sheet, params[:id])
+            if @transaction.destroy
+             { success: "Deleted Transaction" }
+            else
+              error!({ errors: @transaction.errors }, 422)
+            end
+          end
+
+
+          desc 'restore a soft deleted transaction'
+          # PUT /:token/transactions/:id/restore
+          params do
+            requires :id
+          end
+          put ':id/restore' do
+            @transaction = Entry.only_deleted.exists?(params[:id])
+            if @transaction
+              Entry.only_deleted.find(params[:id]).restore
+              { success: "Restored Transaction" }
+            else
+              error!( 'Could not restore transaction', 422)
+            end
+          end
+
+        end
       end
 
     end
