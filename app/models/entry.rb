@@ -1,6 +1,6 @@
 class Entry < ActiveRecord::Base
   acts_as_paranoid
-  belongs_to :sheet
+  belongs_to :sheet, -> { with_deleted }
 
   CATEGORIES = ['Others', 'Airtime', 'Transfers', 'Withdrawals', 'Commissions', 'Refunds', 'Deposits']
 
