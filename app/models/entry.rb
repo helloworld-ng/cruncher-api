@@ -22,7 +22,8 @@ class Entry < ActiveRecord::Base
       balance: self.balance,
       remarks: self.remarks,
       category: self.class::CATEGORIES[self.tag],
-      sheet_id: self.sheet_id
+      sheet_id: self.sheet_id,
+      deleted: self.deleted?
     }
   end
 

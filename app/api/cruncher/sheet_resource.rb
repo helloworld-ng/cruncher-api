@@ -179,7 +179,7 @@ module Cruncher
         # GET /:token/transactions
         get :transactions do
           @sheet = get_sheet(params[:token])
-          @sheet.entries.map(&:as_json)
+          @sheet.entries.with_deleted.map(&:as_json)
         end
       end
 
