@@ -14,6 +14,7 @@ class Entry < ActiveRecord::Base
 
   def as_json
     {
+      id: self.id,
       date: self.date,
       ref: self.ref,
       transaction_type: if self.credit? then 'credit' else 'debit' end,
