@@ -170,8 +170,7 @@ module Cruncher
         end
         get :search do
           @sheet = get_sheet(params[:token])
-          @transactions = @sheet.search(params[:query])
-          @transactions.map(&:as_json)
+          @sheet.search(params[:query])
         end
 
 
