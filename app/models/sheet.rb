@@ -30,9 +30,12 @@ class Sheet < ActiveRecord::Base
 		summary
 	end
 
-	def get_monthly_summary
-		monthly_transactions = entries.group_by {|x| x.date.beginning_of_month }
-		puts monthly_transactions
+	def get_monthly_summary txns
+		if txns.nil?
+			monthly_transactions = entries.group_by {|x| x.date.beginning_of_month }
+		else
+			monthly_transactions = txns.group_by {|x| x.date.beginning_of_month }
+		end
 		summary = []
 		if monthly_transactions.count <= 2
 			return self.get_weekly_summary
@@ -95,8 +98,8 @@ class Sheet < ActiveRecord::Base
 			period[:opening_balance] = transactions.first.balance
 			period[:expense_total] = expenses_total
 			period[:income_total] = income_total
-			period[:expenses] = expenses
-			period[:income] = income
+			period[:expenses] = expenses.map(&:as_json)
+			period[:income] = income.map(&:as_json)
 			period[:transactions] = transactions.count
 
 			comparisons << period
@@ -105,8 +108,43 @@ class Sheet < ActiveRecord::Base
 	end
 
 	def search query
-    self.entries.where("LOWER(remarks) LIKE LOWER(?)", "%#{query}%")
-  	end
+    transactions = self.entries.where("LOWER(remarks) LIKE LOWER(?)", "%#{query}%")
+    credits = transactions.select { |transaction| transaction.credit? }
+    debits = transactions.select { |transaction| transaction.debit? }
+    data = {}
+    data[:transactions] = transactions.map(&:as_json)
+    data[:credits] = credits.count
+    data[:debits] = debits.count
+    data[:expenseAmount] = debits.sum(&:amount)
+    data[:incomeAmount] = credits.sum(&:amount)
+
+    if transactions.count <= 2
+    	grouped_transactions = transactions.group_by {|x| x.date.beginning_of_week }
+    else
+    	grouped_transactions = transactions.group_by {|x| x.date.beginning_of_month }
+    end
+
+		summary = []
+		grouped_transactions.each do |date, txns|
+			month_summary = {}
+			income = txns.select {|transaction| transaction.credit? }.sum(&:amount).round(2)
+			expense = txns.select {|transaction| transaction.debit? }.sum(&:amount).round(2)
+			if transactions.count <= 2
+				month_summary[:week] = Date::MONTHNAMES[date.at_beginning_of_week.month] + ' ' + date.at_beginning_of_week.strftime('%d') + ' - ' + Date::MONTHNAMES[date.at_end_of_week.month] + ' ' + date.at_end_of_week.strftime('%d')
+			else
+				month_summary[:month] = Date::MONTHNAMES[date.month]
+			end
+			month_summary[:year] = date.year.to_s
+			month_summary[:income] = income
+			month_summary[:expense] = expense
+			month_summary[:savings] = (income - expense).round(2)
+			month_summary[:opening] = txns.first.balance
+
+			summary << month_summary
+		end
+    data[:monthlySummary] = summary
+    data
+	end
 
 	private
 	def randomize_id
