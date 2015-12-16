@@ -153,7 +153,7 @@ module Cruncher
 
         desc "Delete a sheet and all it's associated transactions"
         # DELETE /:token/delete
-        delete :delete do
+        delete do
           @sheet = get_sheet(params[:token])
           if @sheet.destroy
             { success: "Deleted Sheet" }
