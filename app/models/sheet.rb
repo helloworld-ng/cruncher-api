@@ -30,12 +30,8 @@ class Sheet < ActiveRecord::Base
 		summary
 	end
 
-	def get_monthly_summary txns
-		if txns.nil?
-			monthly_transactions = entries.group_by {|x| x.date.beginning_of_month }
-		else
-			monthly_transactions = txns.group_by {|x| x.date.beginning_of_month }
-		end
+	def get_monthly_summary
+		monthly_transactions = entries.group_by {|x| x.date.beginning_of_month }
 		summary = []
 		if monthly_transactions.count <= 2
 			return self.get_weekly_summary
