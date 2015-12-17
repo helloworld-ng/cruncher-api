@@ -177,7 +177,7 @@ PLATFORMS
 DEPENDENCIES
   activerecord-import (>= 0.2.0)
   grape
-  ng-bank-parser
+  ng-bank-parser (= 0.1.6)
   paranoia (~> 2.0)
   pg
   rack-cors (= 0.3.0)
