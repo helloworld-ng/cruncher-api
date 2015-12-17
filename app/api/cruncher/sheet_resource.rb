@@ -112,7 +112,7 @@ module Cruncher
       # POST /crunch
       post :crunch do
         result = NgBankParser::Router.parse(params[:bank_code], params[:bank_sheet][:tempfile].path)
-        if result[:status] == 1
+        if result[:status] == 200
           sheet = Sheet.new(name: result[:data][:account_name], address: '', bank: result[:data][:bank_name],account: result[:data][:account_number],
                             from: result[:data][:from_date], to: result[:data][:to_date], email: params[:email])
           if sheet.save

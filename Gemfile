@@ -15,7 +15,7 @@ gem 'grape'
 
 gem "paranoia", "~> 2.0"
 
-gem 'ng-bank-parser'#, :path => "/mnt/0AFE4F7FFE4F6255/Users/lolubodunwa/dev/ruby/ng-bank-parser"
+gem 'ng-bank-parser', '0.1.6'
 
 gem "activerecord-import", ">= 0.2.0"
 
