@@ -13,6 +13,7 @@ class Sheet < ActiveRecord::Base
 
 	def get_weekly_summary
 		weekly_transactions = entries.group_by {|x| x.date.beginning_of_week }
+		weekly_transactions = Hash[weekly_transactions.sort_by{|k, _| k}]
 		summary = []
 		weekly_transactions.each do |date, transactions|
 			week_summary = {}
@@ -32,6 +33,7 @@ class Sheet < ActiveRecord::Base
 
 	def get_monthly_summary
 		monthly_transactions = entries.group_by {|x| x.date.beginning_of_month }
+		monthly_transactions = Hash[monthly_transactions.sort_by{|k, _| k}]
 		summary = []
 		if monthly_transactions.count <= 2
 			return self.get_weekly_summary
@@ -81,6 +83,7 @@ class Sheet < ActiveRecord::Base
 
 	def get_monthly_comparisons
 		monthly_transactions = entries.group_by {|x| x.date.beginning_of_month }
+		monthly_transactions = Hash[monthly_transactions.sort_by{|k, _| k}]
 		comparisons = []
 		monthly_transactions.each do |date, transactions|
 			income = transactions.select {|transaction| transaction.credit? }
@@ -116,8 +119,10 @@ class Sheet < ActiveRecord::Base
 
     if transactions.count <= 2
     	grouped_transactions = transactions.group_by {|x| x.date.beginning_of_week }
+    	grouped_transactions = Hash[grouped_transactions.sort_by{|k, _| k}]
     else
     	grouped_transactions = transactions.group_by {|x| x.date.beginning_of_month }
+    	grouped_transactions = Hash[grouped_transactions.sort_by{|k, _| k}]
     end
 
 		summary = []
