@@ -66,14 +66,16 @@ class Sheet < ActiveRecord::Base
 
 	def get_categories_data
 		categories = []
-		no_of_transactions = entries.count
+		debit_sum = entries.select { |transaction| transaction.debit? }.sum(&:amount)
+		credit_sum = entries.select { |transaction| transaction.credit? }.sum(&:amount)
+		# no_of_transactions = entries.count
 		(0..6).each do |index|
 			transaction_type = index > 4 ? 1 : 0; # Last two categories are credit categories
 			transactions_in_category = entries.where({tag: index, transaction_type: transaction_type})
 			category = {}
-			category[:type] = transaction_type == 1 ? "credit" : "debit";
+			category[:type] = transaction_type == 1 ? "credit" : "debit"
 			category[:name] = Entry::CATEGORIES[index]
-			category[:percent] = transactions_in_category.count.percent_of(no_of_transactions).round(2)
+			category[:percent] = transaction_type == 1 ? transactions_in_category.sum(:amount).percent_of(credit_sum).round(2) : transactions_in_category.sum(:amount).percent_of(debit_sum).round(2)
 			category[:amount] = transactions_in_category.sum(:amount).round(2)
 
 			categories << category
