@@ -15,7 +15,7 @@ gem 'grape'
 
 gem "paranoia", "~> 2.0"
 
-gem 'ng-bank-parser', '0.1.6'
+gem 'ng-bank-parser', '>= 0.1.7'
 
 gem "activerecord-import", ">= 0.2.0"
 
